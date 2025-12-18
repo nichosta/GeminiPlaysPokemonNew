@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "lib": ["ES2022"],
+    "types": ["bun"],
+    "paths": {
+      "@gempp/types": ["./packages/types/src"],
+      "@gempp/core": ["./packages/core/src"],
+      "@gempp/tools": ["./packages/tools/src"],
+      "@gempp/agent": ["./packages/agent/src"],
+      "@gempp/overlay": ["./packages/overlay/src"]
+    }
+  },
+  "include": ["packages/*/src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

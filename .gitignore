@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# CLIs
+.claude
+
+# Build outputs
+dist/
+*.tsbuildinfo
+
+# Bun
+bun.lockb
+
+# Logs
+logs/
+*.log
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+
+# Temporary files
+tmp/
+temp/
+
+# Original project reference (remove after migration)
+GeminiPlaysPokemonLive/
+pokeemerald/
