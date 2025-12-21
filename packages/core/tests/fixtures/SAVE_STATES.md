@@ -2,6 +2,8 @@
 
 This document catalogs all save states needed for testing the `@gempp/core` package. Save states are stored in mGBA's native `.ss1` format.
 
+**Status:** ✅ = Available | ⏳ = Pending | ❌ = Not needed for initial testing
+
 ---
 
 ## Directory Structure
@@ -34,12 +36,12 @@ Examples:
 
 ### Overworld States
 
-| ID | Filename | Description | Requirements |
-|----|----------|-------------|--------------|
-| OW-01 | `overworld_idle.ss1` | Standing still, no menu, no dialogue | Player not moving, no NPCs talking, no weather animation stealing priority |
-| OW-02 | `overworld_walking.ss1` | Mid-step movement | Player between tiles (if capturable) |
-| OW-03 | `overworld_surfing.ss1` | Surfing on water | Player on water tile, Surfing flag set |
-| OW-04 | `overworld_biking.ss1` | Riding bicycle | Player on bike (Mach or Acro) |
+| ID | Status | Filename | Description |
+|----|--------|----------|-------------|
+| OW-01 | ✅ | `overworld_idle.ss1` | Standing still, no menu, no dialogue |
+| OW-02 | ✅ | `overworld_walking.ss1` | Mid-step movement |
+| OW-03 | ⏳ | `overworld_surfing.ss1` | Surfing on water (requires game progress) |
+| OW-04 | ⏳ | `overworld_biking.ss1` | Riding bicycle (requires game progress) |
 
 **Used for:**
 - Verifying no menu tasks are active
@@ -52,11 +54,11 @@ Examples:
 
 #### Start Menu
 
-| ID | Filename | Description | Requirements |
-|----|----------|-------------|--------------|
-| MN-01 | `menu_start_open.ss1` | Start menu visible | Start menu just opened, cursor on first option |
-| MN-02 | `menu_start_pokemon.ss1` | Start menu, POKEMON highlighted | Cursor on POKEMON option |
-| MN-03 | `menu_start_bag.ss1` | Start menu, BAG highlighted | Cursor on BAG option |
+| ID | Status | Filename | Description |
+|----|--------|----------|-------------|
+| MN-01 | ✅ | `menu_start_open.ss1` | Start menu visible, cursor on first option |
+| MN-02 | ✅ | `menu_start_pokemon.ss1` | Start menu, POKEMON highlighted |
+| MN-03 | ✅ | `menu_start_bag.ss1` | Start menu, BAG highlighted |
 
 **Expected task:** `Task_ShowStartMenu` (0x0809fa34)
 
@@ -64,15 +66,15 @@ Examples:
 
 #### Party Menu
 
-| ID | Filename | Description | Requirements |
-|----|----------|-------------|--------------|
-| PM-01 | `menu_party_slot0.ss1` | Party menu, 1st Pokemon selected | Cursor on slot 0 (first Pokemon) |
-| PM-02 | `menu_party_slot1.ss1` | Party menu, 2nd Pokemon selected | Cursor on slot 1 |
-| PM-03 | `menu_party_slot5.ss1` | Party menu, 6th Pokemon selected | Cursor on slot 5 (last slot, needs 6 Pokemon) |
-| PM-04 | `menu_party_cancel.ss1` | Party menu, Cancel selected | Cursor on Cancel button (slot 7) |
-| PM-05 | `menu_party_action_summary.ss1` | Action submenu, Summary highlighted | After pressing A on a Pokemon |
-| PM-06 | `menu_party_action_switch.ss1` | Action submenu, Switch highlighted | Cursor on Switch option |
-| PM-07 | `menu_party_switching.ss1` | Mid-switch, selecting second Pokemon | After selecting Switch, choosing target |
+| ID | Status | Filename | Description |
+|----|--------|----------|-------------|
+| PM-01 | ✅ | `menu_party_slot0.ss1` | Party menu, 1st Pokemon selected |
+| PM-02 | ✅ | `menu_party_slot1.ss1` | Party menu, 2nd Pokemon selected |
+| PM-03 | ✅ | `menu_party_slot5.ss1` | Party menu, 6th Pokemon selected |
+| PM-04 | ✅ | `menu_party_cancel.ss1` | Party menu, Cancel selected |
+| PM-05 | ✅ | `menu_party_action_summary.ss1` | Action submenu, Summary highlighted |
+| PM-06 | ✅ | `menu_party_action_switch.ss1` | Action submenu, Switch highlighted |
+| PM-07 | ✅ | `menu_party_switching.ss1` | Mid-switch, selecting second Pokemon |
 
 **Expected task:** `Task_HandleChooseMonInput` (0x081b1370)
 
@@ -84,12 +86,12 @@ Examples:
 
 #### Bag Menu
 
-| ID | Filename | Description | Requirements |
-|----|----------|-------------|--------------|
-| BG-01 | `menu_bag_items.ss1` | Bag open, Items pocket | First pocket selected |
-| BG-02 | `menu_bag_pokeballs.ss1` | Bag open, Poke Balls pocket | Poke Balls pocket selected |
-| BG-03 | `menu_bag_tms.ss1` | Bag open, TMs/HMs pocket | TMs pocket selected |
-| BG-04 | `menu_bag_item_selected.ss1` | Item action menu open | After pressing A on an item |
+| ID | Status | Filename | Description |
+|----|--------|----------|-------------|
+| BG-01 | ✅ | `menu_bag_items.ss1` | Bag open, Items pocket |
+| BG-02 | ✅ | `menu_bag_pokeballs.ss1` | Bag open, Poke Balls pocket |
+| BG-03 | ✅ | `menu_bag_tms.ss1` | Bag open, TMs/HMs pocket |
+| BG-04 | ✅ | `menu_bag_item_selected.ss1` | Item action menu open |
 
 **Expected task:** `Task_FadeAndCloseBagMenu` (or similar bag handler)
 
@@ -99,37 +101,33 @@ Examples:
 
 #### Wild Battle
 
-| ID | Filename | Description | Requirements |
-|----|----------|-------------|--------------|
-| BT-01 | `battle_wild_action_select.ss1` | Wild battle, action menu | Fight/Bag/Pokemon/Run visible |
-| BT-02 | `battle_wild_move_select.ss1` | Wild battle, move selection | After selecting Fight, 4 moves shown |
-| BT-03 | `battle_wild_party_menu.ss1` | Wild battle, party menu open | After selecting Pokemon from action menu |
-| BT-04 | `battle_wild_bag.ss1` | Wild battle, bag open | After selecting Bag |
-
-**Verification:**
-- `isInBattle()` returns `true`
-- Battle-specific tasks active
+| ID | Status | Filename | Description |
+|----|--------|----------|-------------|
+| BT-01 | ✅ | `battle_wild_action_select.ss1` | Wild battle, action menu |
+| BT-02 | ✅ | `battle_wild_move_select.ss1` | Wild battle, move selection |
+| BT-03 | ✅ | `battle_wild_party_menu.ss1` | Wild battle, party menu open |
+| BT-04 | ✅ | `battle_wild_bag.ss1` | Wild battle, bag open |
 
 ---
 
 #### Trainer Battle
 
-| ID | Filename | Description | Requirements |
-|----|----------|-------------|--------------|
-| BT-10 | `battle_trainer_action.ss1` | Trainer battle, action menu | Cannot run |
-| BT-11 | `battle_trainer_forced_switch.ss1` | Trainer battle, forced switch | After Pokemon faints, must switch |
+| ID | Status | Filename | Description |
+|----|--------|----------|-------------|
+| BT-10 | ✅ | `battle_trainer_action.ss1` | Trainer battle, action menu |
+| BT-11 | ✅ | `battle_trainer_forced_switch.ss1` | Trainer battle, forced switch |
 
 ---
 
 ### Special States
 
-| ID | Filename | Description | Requirements |
-|----|----------|-------------|--------------|
-| SP-01 | `dialogue_npc_talking.ss1` | NPC dialogue box visible | Text box on screen, controls locked |
-| SP-02 | `cutscene_active.ss1` | Mid-cutscene | Script running, player cannot move |
-| SP-03 | `weather_rain.ss1` | Overworld with rain | Weather task active (priority test) |
-| SP-04 | `weather_sandstorm.ss1` | Overworld with sandstorm | Weather task active |
-| SP-05 | `transition_fadeout.ss1` | Screen transitioning | If capturable, test mid-transition |
+| ID | Status | Filename | Description |
+|----|--------|----------|-------------|
+| SP-01 | ✅ | `dialogue_npc_talking.ss1` | NPC dialogue box visible |
+| SP-02 | ⏳ | `cutscene_active.ss1` | Mid-cutscene (requires game progress) |
+| SP-03 | ⏳ | `weather_rain.ss1` | Overworld with rain (requires game progress) |
+| SP-04 | ⏳ | `weather_sandstorm.ss1` | Overworld with sandstorm (requires game progress) |
+| SP-05 | ✅ | `transition_fadeout.ss1` | Screen transitioning |
 
 ---
 
