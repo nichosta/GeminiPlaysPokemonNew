@@ -104,6 +104,14 @@ Retrieves external game knowledge.
 - **Post-execution**: `navigate` checks if destination was reached.
 
 ## Testing
-- Mock mGBA-http server to verify request formats.
-- Unit tests for path validation logic.
-- Integration tests for `stun_npc` flag logic (using mock memory state).
+- **Unit Tests**:
+    - `navigate`: Path validation against `overworld_ledges.ss1` (verify blocked paths).
+    - `hold_buttons`: Verify `Mach Bike` constraint using `overworld_mach_bike.ss1` (valid) vs `overworld_walking.ss1` (invalid).
+- **Integration Tests**:
+    - `stun_npc`: 
+        - Load `overworld_active_npc.ss1`.
+        - Trigger `stun_npc`.
+        - Verify it *waits* for the movement bit to clear before applying stun.
+        - Verify `frozen` bit is set after success.
+- **Manual Verification**:
+    - Use `overworld_mach_bike.ss1` to test meaningful input sequences.

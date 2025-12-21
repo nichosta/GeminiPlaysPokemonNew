@@ -42,6 +42,9 @@ Examples:
 | OW-02 | ✅ | `overworld_walking.ss1` | Mid-step movement |
 | OW-03 | ⏳ | `overworld_surfing.ss1` | Surfing on water (requires game progress) |
 | OW-04 | ⏳ | `overworld_biking.ss1` | Riding bicycle (requires game progress) |
+| OW-05 | ✅ | `overworld_mach_bike.ss1` | Riding Mach Bike (for hold_buttons) |
+| OW-06 | ✅ | `overworld_active_npc.ss1` | NPC mid-movement (for stun_npc safety) |
+| OW-07 | ✅ | `overworld_ledges.ss1` | Near one-way ledges (for navigate) |
 
 **Used for:**
 - Verifying no menu tasks are active

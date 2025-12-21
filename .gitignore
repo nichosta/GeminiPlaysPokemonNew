@@ -41,3 +41,6 @@ temp/
 # Original project reference (remove after migration)
 GeminiPlaysPokemonLive/
 pokeemerald/
+
+# Extra files (incl. mGBA-http executables)
+extra/
