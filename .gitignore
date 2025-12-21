@@ -1,8 +1,9 @@
 # Dependencies
 node_modules/
 
-# CLIs
-.claude
+# Agents
+.claude/
+.gemini/
 
 # Build outputs
 dist/

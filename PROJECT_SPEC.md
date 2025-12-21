@@ -292,7 +292,7 @@ interface SelectRunTool {
 ```
 
 ### `press_buttons`
-Direct button input (fallback for edge cases).
+Direct button input. Always available.
 
 ```typescript
 interface PressButtonsTool {
@@ -320,6 +320,40 @@ interface WebSearchTool {
 1. Query Google Custom Search API
 2. Return top results with snippets
 3. Non-turn-ending (model can search then act)
+
+### `hold_buttons`
+Hold a specific button for a duration.
+
+```typescript
+interface HoldButtonsTool {
+  name: "hold_buttons";
+  params: {
+    button: string;        // Button to hold (e.g., "Up")
+    duration: number;      // Duration in milliseconds
+  };
+}
+```
+
+**Constraints**:
+- Critical for Mach Bike mechanics (e.g., Sky Pillar).
+- **Restriction**: Should return failure if player is not currently on the Mach Bike.
+
+### `stun_npc`
+Temporarily freeze an NPC's movement.
+
+```typescript
+interface StunNPCTool {
+  name: "stun_npc";
+  params: {
+    id: number;            // NPC ID/Index
+  };
+}
+```
+
+**Context**:
+- Solves the issue of interacting with rapidly moving NPCs.
+- **Known Issue**: In the previous implementation, freezing an NPC while they were moving between tiles caused a softlock upon interaction (game waits for NPC to finish stepping).
+- **Future Improvement**: Needs investigation of NPC struct flags to implement a safe freeze that resolves the softlock risk.
 
 ---
 
