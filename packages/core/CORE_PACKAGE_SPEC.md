@@ -68,7 +68,7 @@ interface PokemonData {
   level: number;
   currentHP: number;
   maxHP: number;
-  stats: { atk: number; def: number; spd: number; spa: number; spd: number };
+  stats: { atk: number; def: number; spatk: number; spdef: number; speed: number };
   statusCondition: string | null; // "POISON", "SLEEP", etc. or null
   moves: Array<{ name: string; pp: number }>;
   types: [string, string?];
