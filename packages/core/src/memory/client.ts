@@ -67,7 +67,7 @@ export async function readRange(address: number, length: number): Promise<Uint8A
  */
 export async function isEmulatorConnected(): Promise<boolean> {
     try {
-        const response = await fetch(`${MGBA_HTTP_BASE}/core/info`, {
+        const response = await fetch(`${MGBA_HTTP_BASE}/core/currentFrame`, {
             signal: AbortSignal.timeout(1000)
         });
         return response.ok;

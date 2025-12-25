@@ -190,7 +190,42 @@ When adding a new save state:
 3. Document exact requirements
 4. Create the save state
 5. Verify with a test load
-6. Commit with descriptive message
+6. **Update `src/testing/fixtures.ts`** to include the new fixture path
+7. Commit with descriptive message
+
+---
+
+## Programmatic Access
+
+Save states can be accessed programmatically via the `@gempp/core/testing` module:
+
+```typescript
+import { withSaveState, fixtures, SaveStateManager } from "@gempp/core/testing";
+
+// All fixtures are typed and organized by category
+fixtures.overworld.idle          // Standing still, no menu
+fixtures.menus.party.slot0       // Party menu, 1st Pokemon
+fixtures.battle.wild.actionSelect // Wild battle action menu
+
+// Use withSaveState for automatic backup/restore
+test("party menu detection", async () => {
+    await withSaveState(fixtures.menus.party.slot0, async () => {
+        const isOpen = await isPartyMenuOpen();
+        expect(isOpen).toBe(true);
+    });
+});
+
+// Or use SaveStateManager for manual control
+const manager = new SaveStateManager();
+await manager.backup();          // Backup current state to temp file
+await manager.load(fixtures.battle.wild.actionSelect);
+// ... run tests ...
+await manager.restore();         // Restore original state, clean up temp
+```
+
+**mGBA-http Endpoints Used:**
+- `POST /core/savestatefile?path=...` - Save state to file
+- `POST /core/loadstatefile?path=...` - Load state from file
 
 ---
 
@@ -203,3 +238,4 @@ When adding a new save state:
 | `inventory.test.ts` | BG-01, BG-02, BG-04 |
 | `player.test.ts` | OW-01, OW-03, OW-04, SP-03 |
 | `integration/` | All states |
+

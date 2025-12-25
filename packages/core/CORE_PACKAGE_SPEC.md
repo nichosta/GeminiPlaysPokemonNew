@@ -394,6 +394,10 @@ packages/core/
 │   │   └── capture.ts        # Screenshot + upscale
 │   ├── memory/
 │   │   └── client.ts         # mGBA-http wrapper
+│   ├── testing/              # Test utilities (exported via @gempp/core/testing)
+│   │   ├── index.ts          # Public testing API
+│   │   ├── emulator.ts       # Save state management (load/save/backup/restore)
+│   │   └── fixtures.ts       # Typed fixture registry for all save states
 │   ├── constants/
 │   │   ├── species.ts
 │   │   ├── moves.ts
@@ -406,6 +410,10 @@ packages/core/
 │       ├── emerald.ts
 │       └── index.ts
 ├── tests/
+│   ├── fixtures/
+│   │   ├── SAVE_STATES.md    # Save state catalog
+│   │   └── savestates/       # .ss1 files organized by category
+│   ├── savestate.test.ts     # Testing utilities tests
 │   ├── pokemon.test.ts
 │   ├── inventory.test.ts
 │   ├── player.test.ts
@@ -420,16 +428,45 @@ packages/core/
 
 ## Testing Strategy
 
+### Testing Utilities (`@gempp/core/testing`)
+
+The package exports testing utilities via a subpath export for use in both `@gempp/core` and `@gempp/tools` tests:
+
+```typescript
+import { withSaveState, fixtures, SaveStateManager } from "@gempp/core/testing";
+
+// Simple: auto backup/restore with fixture
+test("party menu detection", async () => {
+    await withSaveState(fixtures.menus.party.slot0, async () => {
+        const isOpen = await isPartyMenuOpen();
+        expect(isOpen).toBe(true);
+    });
+});
+
+// Advanced: manual control
+const manager = new SaveStateManager();
+await manager.backup();          // Saves to temp file
+await manager.load(fixtures.battle.wild.actionSelect);
+// ... do tests ...
+await manager.restore();         // Restores & cleans up temp file
+```
+
+**Key Features:**
+- **Auto-detection**: Tests automatically detect if mGBA-http is running
+- **State isolation**: Each test can backup/restore to avoid state pollution
+- **Typed fixtures**: All save state paths are typed and documented
+
 ### Unit Tests (Bun test)
 
 - **Decryption logic**: Test with known PID/OTID/encrypted data samples
 - **Text encoding**: Test nickname decoding
 - **Lookup tables**: Verify key entries exist
 
-### Integration Tests (with mGBA-http mock)
+### Integration Tests (with mGBA-http)
 
-- Mock HTTP responses with save state data
-- Verify full read paths (party, bag, tasks)
+- Load save state fixtures programmatically
+- Run assertions against known game states
+- Auto-restore original state after each test
 
 ### Manual Verification
 
@@ -439,9 +476,9 @@ packages/core/
 
 ### Save State Fixtures
 
-Collect save states at key moments:
+See `tests/fixtures/SAVE_STATES.md` for the full catalog. Key fixtures:
 - Party menu open (various selections)
-- In battle
+- In battle (wild and trainer)
 - Overworld exploration
 - Start menu open
 
