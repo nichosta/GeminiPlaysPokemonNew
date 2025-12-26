@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest"
+    "test": "bun test"
   },
   "dependencies": {
     "@gempp/core": "workspace:*",
@@ -14,9 +14,6 @@
   },
   "devDependencies": {
     "typescript": "^5.3.3",
-    "@types/node": "^20.10.5",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.1.1",
-    "@types/jest": "^29.5.11"
+    "@types/node": "^20.10.5"
   }
 }

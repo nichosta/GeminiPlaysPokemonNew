@@ -75,3 +75,47 @@ export async function isEmulatorConnected(): Promise<boolean> {
         return false;
     }
 }
+
+// ============================================================================
+// Memory Writing
+// ============================================================================
+
+/**
+ * Write an unsigned 8-bit value to memory
+ */
+export async function writeUint8(address: number, value: number): Promise<void> {
+    const response = await fetch(
+        `${MGBA_HTTP_BASE}/core/write8?address=0x${address.toString(16)}&value=${value}`,
+        { method: "POST" }
+    );
+    if (!response.ok) {
+        throw new Error(`Failed to write memory at 0x${address.toString(16)}: ${response.statusText}`);
+    }
+}
+
+/**
+ * Write an unsigned 16-bit value to memory (little-endian)
+ */
+export async function writeUint16(address: number, value: number): Promise<void> {
+    const response = await fetch(
+        `${MGBA_HTTP_BASE}/core/write16?address=0x${address.toString(16)}&value=${value}`,
+        { method: "POST" }
+    );
+    if (!response.ok) {
+        throw new Error(`Failed to write memory at 0x${address.toString(16)}: ${response.statusText}`);
+    }
+}
+
+/**
+ * Write an unsigned 32-bit value to memory (little-endian)
+ */
+export async function writeUint32(address: number, value: number): Promise<void> {
+    const response = await fetch(
+        `${MGBA_HTTP_BASE}/core/write32?address=0x${address.toString(16)}&value=${value}`,
+        { method: "POST" }
+    );
+    if (!response.ok) {
+        throw new Error(`Failed to write memory at 0x${address.toString(16)}: ${response.statusText}`);
+    }
+}
+

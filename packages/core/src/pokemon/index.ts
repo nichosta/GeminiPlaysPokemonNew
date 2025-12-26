@@ -22,9 +22,8 @@ import {
     SPECIES_INFO_ADDR,
     SPECIES_INFO_SIZE,
     SPECIES_INFO_OFFSETS,
-    IN_BATTLE_BIT_ADDR,
-    IN_BATTLE_BITMASK,
 } from '../addresses';
+
 import { getSpeciesName } from '../constants/speciesMap';
 import { getMoveName } from '../constants/movesMap';
 import { getAbilityName } from '../constants/abilityMap';
@@ -114,10 +113,10 @@ function decryptDataBlock(encryptedData: Uint8Array, pid: number, otid: number):
     // XOR each 32-bit word with the key
     for (let i = 0; i < encryptedData.length; i += 4) {
         const word =
-            encryptedData[i] |
-            (encryptedData[i + 1] << 8) |
-            (encryptedData[i + 2] << 16) |
-            (encryptedData[i + 3] << 24);
+            (encryptedData[i] ?? 0) |
+            ((encryptedData[i + 1] ?? 0) << 8) |
+            ((encryptedData[i + 2] ?? 0) << 16) |
+            ((encryptedData[i + 3] ?? 0) << 24);
 
         const decryptedWord = (word ^ key) >>> 0;
 
@@ -140,6 +139,7 @@ function decryptDataBlock(encryptedData: Uint8Array, pid: number, otid: number):
 function getSubstructureOffset(pid: number, substructure: 'G' | 'A' | 'E' | 'M'): number {
     const orderIndex = pid % 24;
     const order = SUBSTRUCTURE_ORDER[orderIndex];
+    if (!order) throw new Error(`Invalid substructure order index: ${orderIndex}`);
     const position = order.indexOf(substructure);
     return position * SUBSTRUCTURE_SIZE;
 }
@@ -255,7 +255,7 @@ export async function getPokemon(slot: number): Promise<PokemonData | null> {
     // Read and decode nickname
     const nicknameBytes: number[] = [];
     for (let i = 0; i < 10; i++) {
-        nicknameBytes.push(rawData[POKEMON_OFFSETS.NICKNAME + i]);
+        nicknameBytes.push(rawData[POKEMON_OFFSETS.NICKNAME + i] ?? 0);
     }
     const nickname = decodeByteArrayToString(nicknameBytes);
 
@@ -304,10 +304,14 @@ export async function getPokemon(slot: number): Promise<PokemonData | null> {
     ];
 
     for (let i = 0; i < 4; i++) {
-        const moveId = attacks.getUint16(moveOffsets[i], true);
+        const moveOffset = moveOffsets[i];
+        const ppOffset = ppOffsets[i];
+        if (moveOffset === undefined || ppOffset === undefined) continue;
+
+        const moveId = attacks.getUint16(moveOffset, true);
         if (moveId === 0) continue; // Skip empty move slots
 
-        const pp = attacks.getUint8(ppOffsets[i]);
+        const pp = attacks.getUint8(ppOffset);
         const name = getMoveName(moveId) ?? `UNKNOWN_${moveId}`;
         moves.push({ id: moveId, name, pp });
     }
@@ -330,7 +334,7 @@ export async function getPokemon(slot: number): Promise<PokemonData | null> {
     }
 
     // Determine ability
-    const abilityId = speciesInfo.abilities[abilityBit];
+    const abilityId = speciesInfo.abilities[abilityBit as 0 | 1] ?? 0;
     const ability = getAbilityName(abilityId) ?? `UNKNOWN_${abilityId}`;
 
     // Get species and item names
@@ -375,13 +379,7 @@ export async function getFullParty(): Promise<PokemonData[]> {
     return party;
 }
 
-/**
- * Check if the player is currently in a battle
- */
-export async function isInBattle(): Promise<boolean> {
-    const bitmask = await readUint8(IN_BATTLE_BIT_ADDR);
-    return (bitmask & IN_BATTLE_BITMASK) !== 0;
-}
+
 
 // ============================================================================
 // Utility Functions

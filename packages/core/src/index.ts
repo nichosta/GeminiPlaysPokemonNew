@@ -10,4 +10,5 @@ export * from "./overworld/index";
 export * from "./constants/index";
 export * from "./tasks/index";
 export * from "./addresses/index";
+export * from "./battle/index";
 

@@ -54,6 +54,64 @@ export const IN_BATTLE_BIT_ADDR = 0x030026f9;
 export const IN_BATTLE_BITMASK = 0x02;
 
 // ============================================================================
+// Battle Menu Selection
+// ============================================================================
+
+/**
+ * Address of gActionSelectionCursor array - 4 bytes (one per battler)
+ * Values 0-3 correspond to the 2x2 action menu:
+ *   0 = FIGHT     1 = BAG
+ *   2 = POKEMON   3 = RUN
+ */
+export const GACTION_SELECTION_CURSOR_ADDR = 0x020244ac;
+
+/**
+ * Address of gMoveSelectionCursor array - 4 bytes (one per battler)
+ * Values 0-3 correspond to the 2x2 move menu:
+ *   0 = Move 1    1 = Move 2
+ *   2 = Move 3    3 = Move 4
+ */
+export const GMOVE_SELECTION_CURSOR_ADDR = 0x020244b0;
+
+/**
+ * Address of gBattlerInMenuId - which battler is currently in a menu (u8)
+ * For single battles, this is typically 0 (player's first battler)
+ */
+export const GBATTLER_IN_MENU_ID_ADDR = 0x020244b8;
+
+/**
+ * Address of gBattlerControllerFuncs array - 16 bytes (4 function pointers)
+ * Each entry is a 4-byte function pointer for the current controller state
+ */
+export const GBATTLER_CONTROLLER_FUNCS_ADDR = 0x03005d60;
+
+/**
+ * Address of gBattleCommunication array - 8 bytes
+ * Used for battle state machine communication
+ */
+export const GBATTLE_COMMUNICATION_ADDR = 0x02024332;
+
+/** Action selection cursor values */
+export const ACTION_CURSOR = {
+    FIGHT: 0,
+    BAG: 1,
+    POKEMON: 2,
+    RUN: 3,
+} as const;
+
+export type ActionCursorPosition = typeof ACTION_CURSOR[keyof typeof ACTION_CURSOR];
+
+/** Move selection cursor values */
+export const MOVE_CURSOR = {
+    MOVE_1: 0,
+    MOVE_2: 1,
+    MOVE_3: 2,
+    MOVE_4: 3,
+} as const;
+
+export type MoveCursorPosition = typeof MOVE_CURSOR[keyof typeof MOVE_CURSOR];
+
+// ============================================================================
 // Player State
 // ============================================================================
 
@@ -321,3 +379,22 @@ export type PocketName = keyof typeof BAG_POCKETS;
 
 /** Items pocket capacity - the only one that can realistically fill up */
 export const ITEMS_POCKET_CAPACITY = 30;
+
+// ============================================================================
+// Legacy / Bundle for Tools
+// ============================================================================
+
+/** 
+ * Bundle of Emerald addresses for tools package
+ */
+export const EMERALD = {
+    PLAYER_AVATAR_ADDR: PLAYER_AVATAR_FLAGS_ADDR,
+    OBJECT_EVENTS_ADDR: 0x02037338, // gObjectEvents
+    GTASKS_ADDR,
+    IN_BATTLE_BIT_ADDR,
+    PLAYER_PARTY_ADDR,
+    PLAYER_PARTY_COUNT_ADDR,
+    MAP_BANK_ADDR,
+    MAP_NUMBER_ADDR,
+    SAVESTATE_OBJECT_POINTER_ADDR,
+} as const;

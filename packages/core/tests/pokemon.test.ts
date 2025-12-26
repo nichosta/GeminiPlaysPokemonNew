@@ -22,7 +22,6 @@
  * - State with eggs in party
  * - State with Pokemon holding various items
  * - State with Pokemon that have less than 4 moves
- * - Battle state to test isInBattle()
  */
 
 import { describe, test, expect, beforeAll } from "bun:test";
@@ -32,7 +31,6 @@ import {
     getPartyCount,
     getPokemon,
     getFullParty,
-    isInBattle,
     getLeadPokemon,
     hasUsablePokemon,
     getUsablePokemonCount,
@@ -143,31 +141,7 @@ describe("Pokemon Party Reading", () => {
         });
     });
 
-    describe("Battle State", () => {
-        test("should detect not in battle from overworld (requires mGBA)", async () => {
-            if (!emulatorConnected) {
-                console.log("  ⏭️  Skipping - emulator not connected");
-                return;
-            }
-
-            await withSaveState(fixtures.overworld.idle, async () => {
-                const inBattle = await isInBattle();
-                expect(inBattle).toBe(false);
-            });
-        });
-
-        test("should detect in battle from battle state (requires mGBA)", async () => {
-            if (!emulatorConnected) {
-                console.log("  ⏭️  Skipping - emulator not connected");
-                return;
-            }
-
-            await withSaveState(fixtures.battle.wild.actionSelect, async () => {
-                const inBattle = await isInBattle();
-                expect(inBattle).toBe(true);
-            });
-        });
-    });
+    // NOTE: isInBattle tests moved to battle.test.ts with more comprehensive coverage
 
     describe("Utility Functions", () => {
         test("getLeadPokemon should return first Pokemon (requires mGBA)", async () => {
