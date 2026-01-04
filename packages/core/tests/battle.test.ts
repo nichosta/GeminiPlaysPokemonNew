@@ -12,10 +12,16 @@ import {
     getMoveSelectionCursor,
     getBattlerInMenuId,
     getBattleMenuState,
+    getBattlerControllerFunc,
     getActionCursorLabel,
     getMoveCursorLabel,
+    getCurrentBattleMenuType,
+    isInActionMenu,
+    isInMoveMenu,
     ACTION_CURSOR,
     MOVE_CURSOR,
+    BattleMenuType,
+    CONTROLLER_FUNCS,
 } from "../src/battle/index";
 import { SaveStateManager } from "../src/testing/emulator";
 import { fixtures } from "../src/testing/fixtures";
@@ -195,5 +201,78 @@ describe("edge cases", () => {
 
         await expect(getActionSelectionCursor(5)).rejects.toThrow("Invalid battler ID");
         await expect(getMoveSelectionCursor(-1)).rejects.toThrow("Invalid battler ID");
+    });
+});
+
+// ============================================================================
+// Menu Type Detection Tests
+// ============================================================================
+
+describe("getCurrentBattleMenuType", () => {
+    test("should return ACTION_SELECTION in action select screen", async () => {
+        await stateManager.load(fixtures.battle.wild.actionSelect);
+        const menuType = await getCurrentBattleMenuType(0);
+        expect(menuType).toBe(BattleMenuType.ACTION_SELECTION);
+    });
+
+    test("should return MOVE_SELECTION in move select screen", async () => {
+        await stateManager.load(fixtures.battle.wild.moveSelect);
+        const menuType = await getCurrentBattleMenuType(0);
+        expect(menuType).toBe(BattleMenuType.MOVE_SELECTION);
+    });
+});
+
+describe("isInActionMenu / isInMoveMenu", () => {
+    test("isInActionMenu should be true in action select screen", async () => {
+        await stateManager.load(fixtures.battle.wild.actionSelect);
+        expect(await isInActionMenu()).toBe(true);
+        expect(await isInMoveMenu()).toBe(false);
+    });
+
+    test("isInMoveMenu should be true in move select screen", async () => {
+        await stateManager.load(fixtures.battle.wild.moveSelect);
+        expect(await isInActionMenu()).toBe(false);
+        expect(await isInMoveMenu()).toBe(true);
+    });
+});
+
+// ============================================================================
+// Discovery Test - Use this to find controller function pointer values
+// ============================================================================
+
+describe("function pointer discovery (for debugging)", () => {
+    test("log controller function pointers from both menu states", async () => {
+        // This test is for discovering the correct function pointer values
+        const { readUint8 } = await import("../src/memory/client");
+
+        // gBattleBufferA address - first byte is the command
+        const BATTLE_BUFFER_A_ADDR = 0x02023064;
+        const BUFFER_SIZE = 0x200; // Each battler has 512 bytes
+
+        console.log("\n=== Controller Function Pointer Discovery ===\n");
+
+        await stateManager.load(fixtures.battle.wild.actionSelect);
+        const actionBattler = await getBattlerInMenuId();
+        const actionState = await getBattleMenuState();
+        const actionCmd = await readUint8(BATTLE_BUFFER_A_ADDR + actionBattler * BUFFER_SIZE);
+        console.log("Action Select State:");
+        console.log(`  battlerInMenuId = ${actionBattler}`);
+        console.log(`  gBattleBufferA[${actionBattler}][0] = ${actionCmd} (CONTROLLER_CHOOSEACTION = 18)`);
+        console.log(`  controllerFunc[0] = 0x${(await getBattlerControllerFunc(0)).toString(16).padStart(8, '0')}`);
+        console.log(`  actionCursor = ${actionState.actionCursor}`);
+
+        await stateManager.load(fixtures.battle.wild.moveSelect);
+        const moveBattler = await getBattlerInMenuId();
+        const moveState = await getBattleMenuState();
+        const moveCmd = await readUint8(BATTLE_BUFFER_A_ADDR + moveBattler * BUFFER_SIZE);
+        console.log("\nMove Select State:");
+        console.log(`  battlerInMenuId = ${moveBattler}`);
+        console.log(`  gBattleBufferA[${moveBattler}][0] = ${moveCmd} (CONTROLLER_CHOOSEMOVE = 20)`);
+        console.log(`  controllerFunc[0] = 0x${(await getBattlerControllerFunc(0)).toString(16).padStart(8, '0')}`);
+        console.log(`  moveCursor = ${moveState.moveCursor}`);
+
+        console.log("\nController commands:");
+        console.log("  CONTROLLER_CHOOSEACTION = 18 (0x12)");
+        console.log("  CONTROLLER_CHOOSEMOVE = 20 (0x14)");
     });
 });

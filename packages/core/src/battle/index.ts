@@ -164,6 +164,79 @@ export async function getBattleMenuState(): Promise<BattleMenuState> {
     };
 }
 
+/**
+ * Known controller function pointer values for menu state detection.
+ *
+ * These are addresses of static functions in the battle controller.
+ * They're determined empirically by comparing values from known save states.
+ *
+ * NOTE: These are Thumb function addresses (LSB set to 1 indicates Thumb mode).
+ * If these values don't match, run the discovery test to find the
+ * correct addresses for your ROM version.
+ */
+export const CONTROLLER_FUNCS = {
+    /** HandleInputChooseAction - main battle menu (Fight/Bag/Pokemon/Run) */
+    HANDLE_INPUT_CHOOSE_ACTION: 0x08057589,
+    /** HandleInputChooseMove - move selection menu */
+    HANDLE_INPUT_CHOOSE_MOVE: 0x08057bfd,
+    /** HandleInputChooseTarget - target selection for moves (TODO: verify with double battle save state) */
+    HANDLE_INPUT_CHOOSE_TARGET: 0x00000000, // Placeholder - needs double battle save state
+} as const;
+
+/**
+ * The type of battle menu currently active
+ */
+export enum BattleMenuType {
+    /** Not in a recognized menu state */
+    UNKNOWN = "unknown",
+    /** Main battle menu: Fight / Bag / Pokemon / Run */
+    ACTION_SELECTION = "action_selection",
+    /** Move selection: choosing which move to use */
+    MOVE_SELECTION = "move_selection",
+    /** Target selection: choosing which Pokemon to target */
+    TARGET_SELECTION = "target_selection",
+}
+
+/**
+ * Determine which battle menu is currently active.
+ * 
+ * Uses the controller function pointer to identify the current state.
+ * 
+ * @param battlerId - The battler index (0 for player in single battles)
+ * @returns The type of battle menu currently active
+ */
+export async function getCurrentBattleMenuType(battlerId: number = 0): Promise<BattleMenuType> {
+    const funcPtr = await getBattlerControllerFunc(battlerId);
+
+    switch (funcPtr) {
+        case CONTROLLER_FUNCS.HANDLE_INPUT_CHOOSE_ACTION:
+            return BattleMenuType.ACTION_SELECTION;
+        case CONTROLLER_FUNCS.HANDLE_INPUT_CHOOSE_MOVE:
+            return BattleMenuType.MOVE_SELECTION;
+        case CONTROLLER_FUNCS.HANDLE_INPUT_CHOOSE_TARGET:
+            return BattleMenuType.TARGET_SELECTION;
+        default:
+            return BattleMenuType.UNKNOWN;
+    }
+}
+
+/**
+ * Check if the player is currently in the action selection menu
+ * (Fight / Bag / Pokemon / Run)
+ */
+export async function isInActionMenu(battlerId: number = 0): Promise<boolean> {
+    const menuType = await getCurrentBattleMenuType(battlerId);
+    return menuType === BattleMenuType.ACTION_SELECTION;
+}
+
+/**
+ * Check if the player is currently in the move selection menu
+ */
+export async function isInMoveMenu(battlerId: number = 0): Promise<boolean> {
+    const menuType = await getCurrentBattleMenuType(battlerId);
+    return menuType === BattleMenuType.MOVE_SELECTION;
+}
+
 // Re-export cursor constants for convenience
 export { ACTION_CURSOR, MOVE_CURSOR };
 export type { ActionCursorPosition, MoveCursorPosition };

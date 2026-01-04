@@ -122,6 +122,21 @@ Examples:
 
 ---
 
+#### Double Battle
+
+| ID | Status | Filename | Description |
+|----|--------|----------|-------------|
+| BT-20 | ⏳ | `battle_double_action_select.ss1` | Double battle, action menu |
+| BT-21 | ⏳ | `battle_double_move_select.ss1` | Double battle, move selection |
+| BT-22 | ⏳ | `battle_double_target_select.ss1` | Double battle, target selection (for menu type detection) |
+
+**Purpose:** Double battle save states are needed to:
+- Verify `HandleInputChooseTarget` controller function address
+- Test multi-target move selection
+- Validate battle menu cursor reading with multiple active battlers
+
+---
+
 ### Special States
 
 | ID | Status | Filename | Description |

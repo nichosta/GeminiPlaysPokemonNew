@@ -14,21 +14,69 @@ import * as os from "node:os";
 const MGBA_HTTP_BASE = process.env.MGBA_HTTP_URL ?? "http://localhost:5000";
 
 /**
+ * Convert a path to a format that mGBA (running on Windows) can understand.
+ * 
+ * When running from WSL, paths like `/mnt/c/repositories/...` need to be
+ * converted to Windows paths like `C:\repositories\...`.
+ * 
+ * @param filePath - The path to convert
+ * @returns Windows-compatible path
+ */
+function toMgbaPath(filePath: string): string {
+    // Check if this is a WSL path (starts with /mnt/)
+    const wslMatch = filePath.match(/^\/mnt\/([a-zA-Z])\/(.*)/);
+    if (wslMatch) {
+        const [, drive, rest] = wslMatch;
+        // Convert to Windows path: C:\repositories\...
+        return `${drive!.toUpperCase()}:\\${rest!.replace(/\//g, "\\")}`;
+    }
+
+    // Not a WSL path, just normalize backslashes to forward slashes
+    // (in case we get a Windows path with forward slashes)
+    return filePath.replace(/\//g, "\\");
+}
+/**
+ * Release all buttons to ensure clean input state.
+ * This should be called after loading a save state to prevent
+ * button presses from previous operations from persisting.
+ */
+async function releaseAllButtons(): Promise<void> {
+    const buttons = ["A", "B", "Start", "Select", "Up", "Down", "Left", "Right", "L", "R"];
+
+    // Construct URL manually to handle array parameters
+    const url = new URL(`${MGBA_HTTP_BASE}/mgba-http/button/clearmany`);
+    for (const button of buttons) {
+        url.searchParams.append("buttons", button);
+    }
+
+    await fetch(url.toString(), { method: "POST" })
+        .catch(err => console.error("releaseAllButtons failed:", err));
+}
+
+/**
  * Load a save state file into the emulator
  * @param statePath - Absolute path to the .ss1 save state file
  */
 export async function loadStateFile(statePath: string): Promise<void> {
-    // Normalize path for mGBA-http (it may need forward slashes)
-    const normalizedPath = statePath.replace(/\\/g, "/");
+    // Convert path for mGBA (handles WSL -> Windows conversion)
+    const mgbaPath = toMgbaPath(statePath);
 
+    // Release all buttons to ensure clean input state BEFORE loading
+    await releaseAllButtons();
+
+    // Load the state file
     const response = await fetch(
-        `${MGBA_HTTP_BASE}/core/loadstatefile?path=${encodeURIComponent(normalizedPath)}`,
+        `${MGBA_HTTP_BASE}/core/loadstatefile?path=${encodeURIComponent(mgbaPath)}`,
         { method: "POST" }
     );
 
     if (!response.ok) {
-        throw new Error(`Failed to load state file "${statePath}": ${response.statusText}`);
+        throw new Error(`Failed to load state file "${mgbaPath}": ${response.statusText}`);
     }
+
+    // Wait for the state to load and the emulator to settle.
+    // We wait 500ms to ensure the emulator has processed the load and any initial frames.
+    await new Promise(resolve => setTimeout(resolve, 500));
 }
 
 /**
@@ -36,21 +84,22 @@ export async function loadStateFile(statePath: string): Promise<void> {
  * @param statePath - Absolute path where the .ss1 file should be saved
  */
 export async function saveStateFile(statePath: string): Promise<void> {
-    // Ensure directory exists
+    // Ensure directory exists (use the original path for fs operations)
     const dir = path.dirname(statePath);
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
     }
 
-    const normalizedPath = statePath.replace(/\\/g, "/");
+    // Convert path for mGBA (handles WSL -> Windows conversion)
+    const mgbaPath = toMgbaPath(statePath);
 
     const response = await fetch(
-        `${MGBA_HTTP_BASE}/core/savestatefile?path=${encodeURIComponent(normalizedPath)}`,
+        `${MGBA_HTTP_BASE}/core/savestatefile?path=${encodeURIComponent(mgbaPath)}`,
         { method: "POST" }
     );
 
     if (!response.ok) {
-        throw new Error(`Failed to save state file "${statePath}": ${response.statusText}`);
+        throw new Error(`Failed to save state file "${mgbaPath}": ${response.statusText}`);
     }
 }
 

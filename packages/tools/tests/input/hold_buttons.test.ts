@@ -31,7 +31,8 @@ describe("holdButtons", () => {
 
             await withSaveState(fixtures.overworld.idle, async () => {
                 // Player is walking in overworld_idle, not on Mach Bike
-                await expect(holdButtons("Up", 100)).rejects.toThrow("Safety Constraint");
+                // Duration is in frames (60 = ~1 second)
+                await expect(holdButtons("Up", 60)).rejects.toThrow("Safety Constraint");
             });
         });
 
@@ -43,11 +44,10 @@ describe("holdButtons", () => {
 
             await withSaveState(fixtures.overworld.machBike, async () => {
                 // Player is on Mach Bike in overworld_mach_bike
-                // This will likely fail the HTTP call since mGBA-http might not be fully configured,
-                // but it should NOT throw the Safety Constraint error
+                // This should pass the safety check and call the API
                 try {
-                    await holdButtons("Up", 100);
-                    // If we get here, the safety check passed (HTTP might have succeeded or failed after)
+                    await holdButtons("Up", 30); // 30 frames = ~0.5 seconds
+                    // If we get here, the safety check passed
                 } catch (error) {
                     // The error should NOT be the safety constraint
                     expect((error as Error).message).not.toContain("Safety Constraint");
@@ -56,17 +56,16 @@ describe("holdButtons", () => {
         });
     });
 
-    describe("Input Validation", () => {
-        test("should pass button and duration to mGBA endpoint (requires mGBA)", async () => {
+    describe("API Integration", () => {
+        test("should successfully hold button when on Mach Bike (requires mGBA)", async () => {
             if (!emulatorConnected) {
                 console.log("  ⏭️  Skipping - emulator not connected");
                 return;
             }
 
             await withSaveState(fixtures.overworld.machBike, async () => {
-                // If mGBA-http /buttons/hold endpoint is available, this should succeed
-                // The actual button hold behavior depends on the server implementation
-                const result = await holdButtons("A", 500);
+                // This tests the full flow: safety check + API call
+                const result = await holdButtons("A", 10);
                 expect(result).toBe(true);
             });
         });
